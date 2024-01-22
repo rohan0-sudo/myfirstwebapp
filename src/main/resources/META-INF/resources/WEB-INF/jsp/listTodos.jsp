@@ -2,7 +2,7 @@
 
 <html>
 	<head>
-		<title>todos</title>
+		<title>todos in git repository</title>
 	</head>
 	<body>
 		<div>welcome ${name}</div>
