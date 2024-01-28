@@ -15,21 +15,23 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import jakarta.validation.Valid;
 
-//@Controller
+@Controller
 @SessionAttributes("name")
-public class TodoController {
+public class TodoControllerJpa {
 
 	private TodoService todoService;
+	private TodoRepository todoRepository;
 
-	public TodoController(TodoService todoService) {
+	public TodoControllerJpa(TodoService todoService, TodoRepository todoRepository) {
 		super();
 		this.todoService = todoService;
+		this.todoRepository=todoRepository;
 	}
 
 	@RequestMapping("list-Todo")
 	public String listAllTodos(ModelMap model) {
 		String userName = getLoggedInUserName(model);
-		List<Todo> todos = todoService.findByUserName(userName);
+		List<Todo> todos = todoRepository.findByUserName(userName);
 		model.put("todos", todos);
 		return "listTodos";
 	}
@@ -50,19 +52,21 @@ public class TodoController {
 			return "todo";
 		}
 		String userName = getLoggedInUserName(model);
-		todoService.addTodos(userName, todo.getDescription(), todo.getTargetDate(), false);
+		todo.setUserName(userName);
+		todoRepository.save(todo);
+//		todoService.addTodos(userName, todo.getDescription(), todo.getTargetDate(), false);
 		return "redirect:list-Todo";
 	}
 
 	@RequestMapping("delete-todo")
 	public String deleteTodos(@RequestParam int id) {
-		todoService.deleteById(id);
+		todoRepository.deleteById(id);
 		return "redirect:list-Todo";
 	}
 
 	@RequestMapping(value = "update-todo", method = RequestMethod.GET)
 	public String updateTodoPage(@RequestParam int id, ModelMap model) {
-		Todo todo = todoService.findById(id);
+		Todo todo = todoRepository.findById(id).get();
 		model.addAttribute("todo", todo);
 		return "todo";
 	}
@@ -74,7 +78,8 @@ public class TodoController {
 		}
 		String userName = getLoggedInUserName(model);
 		todo.setUserName(userName);
-		todoService.updateTodo(todo);
+		todoRepository.save(todo);
+//		todoService.updateTodo(todo);
 		return "redirect:list-Todo";
 	}
 	private String getLoggedInUserName(ModelMap model) {
